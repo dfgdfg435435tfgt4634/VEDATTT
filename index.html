@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pembe Zarf – Küçük Bir Aşk Notu</title>
+    <meta name="description" content="Zarfa tıkla, not açılsın; kalpten kısa bir şiirle.">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', 'SF Pro Display', 'Roboto', sans-serif;
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+
+        .container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #F8BBD0 0%, #F48FB1 50%, #F06292 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            perspective: 1000px;
+        }
+
+        .envelope-container {
+            position: relative;
+            transform: translateZ(0);
+            will-change: transform;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .envelope-container:hover:not(.opened) {
+            transform: scale(1.04) translateZ(0);
+        }
+
+        .envelope-container:focus:not(.opened) {
+            transform: scale(1.04) translateZ(0);
+            outline: 3px solid #B0003A;
+            outline-offset: 8px;
+            border-radius: 8px;
+        }
+
+        .envelope {
+            position: relative;
+            width: clamp(380px, 40vw, 520px);
+            height: clamp(280px, 28vw, 380px);
+            cursor: pointer;
+            transform: translateZ(0);
+            transform-style: preserve-3d;
+        }
+
+        .envelope-body {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(145deg, #E8A5C0 0%, #E091B3 30%, #D67FA6 70%, #CC6D99 100%);
+            border-radius: 8px;
+            box-shadow: 
+                0 20px 60px rgba(204, 109, 153, 0.4),
+                0 12px 30px rgba(204, 109, 153, 0.25),
+                0 6px 15px rgba(204, 109, 153, 0.15),
+                inset 0 3px 0 rgba(255, 255, 255, 0.2),
+                inset 0 -3px 0 rgba(176, 0, 58, 0.15),
+                inset 2px 0 0 rgba(255, 255, 255, 0.1),
+                inset -2px 0 0 rgba(176, 0, 58, 0.08);
+            z-index: 1;
+            transform: translateZ(0);
+        }
+
+        .envelope-body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.15) 0%, 
+                transparent 20%,
+                transparent 80%,
+                rgba(176, 0, 58, 0.08) 100%);
+            border-radius: 8px;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .envelope-body::after {
+            content: "";
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            right: 2px;
+            bottom: 2px;
+            background: linear-gradient(45deg, 
+                rgba(255, 255, 255, 0.05) 0%, 
+                transparent 50%);
+            border-radius: 6px;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .envelope-lid {
+            position: absolute;
+            width: 100%;
+            height: 65%;
+            top: 0;
+            left: 0;
+            background: linear-gradient(145deg, #D67FA6 0%, #CC6D99 30%, #C2185B 70%, #B0003A 100%);
+            transform-origin: 50% 100%;
+            border-radius: 8px 8px 0 0;
+            box-shadow: 
+                0 15px 40px rgba(176, 0, 58, 0.5),
+                0 8px 20px rgba(176, 0, 58, 0.3),
+                0 4px 10px rgba(176, 0, 58, 0.2),
+                inset 0 2px 0 rgba(255, 255, 255, 0.25),
+                inset 0 -2px 0 rgba(176, 0, 58, 0.2),
+                inset 2px 0 0 rgba(255, 255, 255, 0.1),
+                inset -2px 0 0 rgba(176, 0, 58, 0.1);
+            z-index: 3;
+            transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            will-change: transform;
+            clip-path: polygon(0 0, 100% 0, 50% 100%);
+            transform: translateZ(10px);
+        }
+
+        .envelope-lid::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(145deg, 
+                rgba(255, 255, 255, 0.2) 0%, 
+                rgba(255, 255, 255, 0.1) 25%,
+                transparent 50%, 
+                rgba(176, 0, 58, 0.1) 100%);
+            clip-path: polygon(0 0, 100% 0, 50% 100%);
+            border-radius: 8px 8px 0 0;
+        }
+
+        .envelope-lid::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 60%;
+            height: 2px;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(176, 0, 58, 0.3) 50%, 
+                transparent 100%);
+            transform: translate(-50%, -50%);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .envelope-fold-line {
+            content: "";
+            position: absolute;
+            top: 60%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 25px solid transparent;
+            border-right: 25px solid transparent;
+            border-bottom: 20px solid rgba(176, 0, 58, 0.15);
+            z-index: 1;
+            opacity: 0.6;
+            transform: translateX(-50%) translateZ(-5px);
+            pointer-events: none;
+        }
+
+        .envelope-container.opened .envelope-lid {
+            transform: rotateX(-160deg);
+        }
+
+        .note-paper {
+            position: absolute;
+            width: 92%;
+            height: 85%;
+            top: 8%;
+            left: 50%;
+            transform: translate(-50%, 0%) translateY(100%);
+            background: linear-gradient(145deg, #FFFBF5 0%, #FFF8F0 50%, #FFFAF5 100%);
+            border-radius: 0;
+            box-shadow: 
+                0 -8px 25px rgba(0, 0, 0, 0.15),
+                0 -4px 12px rgba(0, 0, 0, 0.1),
+                0 -2px 6px rgba(0, 0, 0, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9),
+                inset 1px 0 0 rgba(255, 255, 255, 0.5),
+                inset -1px 0 0 rgba(0, 0, 0, 0.05);
+            z-index: 2;
+            opacity: 0;
+            transform: translateZ(15px);
+            transition: all 0.9s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            will-change: transform, opacity;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: clamp(24px, 6vw, 40px);
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 85%, 0 100%);
+        }
+
+        .note-paper::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, transparent 50%),
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 24px,
+                    rgba(240, 98, 146, 0.03) 25px
+                );
+            pointer-events: none;
+            border-radius: 2px 2px 0 0;
+        }
+
+        .envelope-container.opened .note-paper {
+            transform: translate(-50%, 0%) translateY(-15%);
+            opacity: 1;
+            transition-delay: 0.4s;
+        }
+
+        .password-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(176, 0, 58, 0.95);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .password-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .password-modal {
+            background: linear-gradient(145deg, #FFFBF5 0%, #FFF8F0 100%);
+            padding: clamp(32px, 8vw, 48px);
+            border-radius: 16px;
+            box-shadow: 
+                0 25px 80px rgba(0, 0, 0, 0.3),
+                0 15px 40px rgba(0, 0, 0, 0.2),
+                inset 0 2px 0 rgba(255, 255, 255, 0.9);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            transform: scale(0.8) translateY(20px);
+            transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .password-overlay.show .password-modal {
+            transform: scale(1) translateY(0);
+        }
+
+        .password-title {
+            color: #B0003A;
+            font-size: clamp(20px, 5vw, 24px);
+            font-weight: 600;
+            margin-bottom: 24px;
+            text-shadow: 0 1px 2px rgba(176, 0, 58, 0.1);
+        }
+
+        .password-input {
+            width: 100%;
+            max-width: 200px;
+            padding: 16px 20px;
+            font-size: 24px;
+            text-align: center;
+            border: 3px solid #F48FB1;
+            border-radius: 12px;
+            background: #FFFFFF;
+            color: #B0003A;
+            font-weight: 600;
+            letter-spacing: 8px;
+            margin-bottom: 24px;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .password-input:focus {
+            border-color: #B0003A;
+            box-shadow: 0 0 0 4px rgba(176, 0, 58, 0.1);
+        }
+
+        .password-input.error {
+            border-color: #E91E63;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        .screen-shake {
+            animation: screenShake 0.6s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        @keyframes screenShake {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            10% { transform: translate(-2px, -1px) rotate(-0.5deg); }
+            20% { transform: translate(-1px, 1px) rotate(0.5deg); }
+            30% { transform: translate(2px, -1px) rotate(-0.5deg); }
+            40% { transform: translate(-1px, -2px) rotate(0.5deg); }
+            50% { transform: translate(1px, 1px) rotate(-0.5deg); }
+            60% { transform: translate(-2px, 1px) rotate(0.5deg); }
+            70% { transform: translate(2px, -2px) rotate(-0.5deg); }
+            80% { transform: translate(-1px, 1px) rotate(0.5deg); }
+            90% { transform: translate(1px, -1px) rotate(-0.5deg); }
+        }
+
+        .password-button {
+            background: linear-gradient(145deg, #F48FB1 0%, #E91E63 100%);
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(233, 30, 99, 0.3);
+            margin-right: 12px;
+        }
+
+        .password-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(233, 30, 99, 0.4);
+        }
+
+        .password-button:active {
+            transform: translateY(0);
+        }
+
+        .password-button.cancel {
+            background: linear-gradient(145deg, #BDBDBD 0%, #9E9E9E 100%);
+            box-shadow: 0 4px 15px rgba(158, 158, 158, 0.3);
+        }
+
+        .password-button.cancel:hover {
+            box-shadow: 0 6px 20px rgba(158, 158, 158, 0.4);
+        }
+
+        .error-message {
+            color: #E91E63;
+            font-size: 14px;
+            margin-top: 12px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .error-message.show {
+            opacity: 1;
+        }
+
+        .lockout-message {
+            color: #E91E63;
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 16px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            text-align: center;
+        }
+
+        .lockout-message.show {
+            opacity: 1;
+        }
+
+        .attempts-counter {
+            color: #F48FB1;
+            font-size: 14px;
+            margin-top: 8px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .attempts-counter.show {
+            opacity: 1;
+        }
+
+        .lockout-poem {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #F8BBD0 0%, #F48FB1 50%, #F06292 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.5s ease;
+            padding: 20px;
+        }
+
+        .lockout-poem.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .lockout-poem-content {
+            background: linear-gradient(145deg, #FFFBF5 0%, #FFF8F0 100%);
+            padding: clamp(32px, 8vw, 48px);
+            border-radius: 16px;
+            box-shadow: 
+                0 25px 80px rgba(0, 0, 0, 0.3),
+                0 15px 40px rgba(0, 0, 0, 0.2),
+                inset 0 2px 0 rgba(255, 255, 255, 0.9);
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            transform: scale(0.8) translateY(20px);
+            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .lockout-poem.show .lockout-poem-content {
+            transform: scale(1) translateY(0);
+        }
+
+        .lockout-poem-text {
+            color: #B0003A;
+            font-size: clamp(18px, 4.5vw, 24px);
+            line-height: 1.6;
+            font-weight: 400;
+            letter-spacing: 0.3px;
+            text-shadow: 0 1px 2px rgba(176, 0, 58, 0.1);
+            margin-bottom: 24px;
+        }
+
+        .lockout-timer {
+            color: #E91E63;
+            font-size: clamp(16px, 4vw, 20px);
+            font-weight: 600;
+            margin-top: 16px;
+        }
+
+        .poem-text {
+            color: #B0003A;
+            font-size: clamp(18px, 4.5vw, 24px);
+            line-height: 1.4;
+            text-align: center;
+            font-weight: 400;
+            letter-spacing: 0.3px;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 1px 2px rgba(176, 0, 58, 0.1);
+        }
+
+        /* Accessibility - Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            .envelope-lid,
+            .note-paper,
+            .envelope-container {
+                transition-duration: 0.1s !important;
+                transition-delay: 0s !important;
+            }
+            
+            .envelope-container.opened .note-paper {
+                transition-delay: 0.1s !important;
+            }
+        }
+
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            .envelope {
+                width: clamp(320px, 70vw, 400px);
+                height: clamp(230px, 50vw, 285px);
+            }
+            
+            .envelope-container:hover:not(.opened) {
+                transform: scale(1.02) translateZ(0);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .note-paper {
+                padding: clamp(16px, 4vw, 24px);
+            }
+            
+            .poem-text {
+                font-size: clamp(16px, 4vw, 20px);
+                line-height: 1.3;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div 
+            class="envelope-container" 
+            role="button" 
+            tabindex="0" 
+            aria-label="Zarfı aç"
+            id="envelopeContainer"
+        >
+            <div class="envelope">
+                <div class="envelope-body"></div>
+                <div class="envelope-lid"></div>
+                <div class="note-paper">
+                    <div class="poem-text">vedattttttttt seni yerim lan kuru göt.</div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+
+    <div class="password-overlay" id="passwordOverlay">
+        <div class="password-modal">
+            <h2 class="password-title">🔒 Şifre Gerekli</h2>
+            <input 
+                type="password" 
+                class="password-input" 
+                id="passwordInput" 
+                maxlength="4" 
+                placeholder="****"
+                autocomplete="off"
+            >
+            <div class="error-message" id="errorMessage">Yanlış şifre! Tekrar deneyin.</div>
+            <div class="attempts-counter" id="attemptsCounter"></div>
+            <div class="lockout-message" id="lockoutMessage"></div>
+            <div>
+                <button class="password-button" id="submitPassword">Aç</button>
+                <button class="password-button cancel" id="cancelPassword">İptal</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="lockout-poem" id="lockoutPoem">
+        <div class="lockout-poem-content">
+            <div class="lockout-poem-text">
+                Bebeğim 💖 bizim için en özel anı unutmuş olamazsın... 🌹 Şifreyi yanlış tuşladın ama sorun değil 😘 Çünkü o anı hatırlamak zaten şifreden daha değerli ✨ Seninle paylaştığımız her şey hafızamda kilitli 🔒 ve kalbimde saklı 💕 Tekrar dene, eminim bu sefer doğru olacak 😍.
+            </div>
+            <div class="lockout-timer" id="lockoutTimer">60 saniye kaldı</div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            'use strict';
+            
+            const envelopeContainer = document.getElementById('envelopeContainer');
+            const passwordOverlay = document.getElementById('passwordOverlay');
+            const passwordInput = document.getElementById('passwordInput');
+            const submitButton = document.getElementById('submitPassword');
+            const cancelButton = document.getElementById('cancelPassword');
+            const errorMessage = document.getElementById('errorMessage');
+            const attemptsCounter = document.getElementById('attemptsCounter');
+            const lockoutMessage = document.getElementById('lockoutMessage');
+            const lockoutPoem = document.getElementById('lockoutPoem');
+            const lockoutTimer = document.getElementById('lockoutTimer');
+            const correctPassword = '2807';
+            let failedAttempts = 0;
+            let isLockedOut = false;
+            let lockoutEndTime = 0;
+            let isAnimating = false;
+            let isPasswordCorrect = false;
+
+            // Vibration function
+            function vibrate(pattern = [200, 100, 200]) {
+                if ('vibrate' in navigator) {
+                    navigator.vibrate(pattern);
+                }
+            }
+
+            // Screen shake function
+            function shakeScreen() {
+                document.body.classList.add('screen-shake');
+                setTimeout(() => {
+                    document.body.classList.remove('screen-shake');
+                }, 600);
+            }
+
+            function updateAttemptsCounter() {
+                if (failedAttempts > 0) {
+                    attemptsCounter.textContent = `Kalan deneme hakkı: ${3 - failedAttempts}`;
+                    attemptsCounter.classList.add('show');
+                } else {
+                    attemptsCounter.classList.remove('show');
+                }
+            }
+
+            function startLockout() {
+                isLockedOut = true;
+                lockoutEndTime = Date.now() + 60000; // 60 seconds
+                hidePasswordModal();
+                
+                setTimeout(() => {
+                    lockoutPoem.classList.add('show');
+                    updateLockoutTimer();
+                }, 300);
+            }
+
+            function updateLockoutTimer() {
+                if (!isLockedOut) return;
+                
+                const remainingTime = Math.max(0, Math.ceil((lockoutEndTime - Date.now()) / 1000));
+                
+                if (remainingTime > 0) {
+                    lockoutTimer.textContent = `${remainingTime} saniye kaldı`;
+                    setTimeout(updateLockoutTimer, 1000);
+                } else {
+                    // Lockout ended
+                    isLockedOut = false;
+                    failedAttempts = 0;
+                    lockoutPoem.classList.remove('show');
+                }
+            }
+
+            function showPasswordModal() {
+                if (isLockedOut) {
+                    lockoutPoem.classList.add('show');
+                    updateLockoutTimer();
+                    return;
+                }
+                
+                passwordOverlay.classList.add('show');
+                updateAttemptsCounter();
+                setTimeout(() => {
+                    passwordInput.focus();
+                }, 300);
+            }
+
+            function hidePasswordModal() {
+                passwordOverlay.classList.remove('show');
+                passwordInput.value = '';
+                passwordInput.classList.remove('error');
+                errorMessage.classList.remove('show');
+                attemptsCounter.classList.remove('show');
+                lockoutMessage.classList.remove('show');
+            }
+
+            function showError() {
+                failedAttempts++;
+                
+                // Vibrate device and shake screen
+                vibrate([300, 100, 300, 100, 300]);
+                shakeScreen();
+                
+                passwordInput.classList.add('error');
+                errorMessage.classList.add('show');
+                passwordInput.value = '';
+                
+                updateAttemptsCounter();
+                
+                if (failedAttempts >= 3) {
+                    startLockout();
+                    return;
+                }
+                
+                setTimeout(() => {
+                    passwordInput.classList.remove('error');
+                    errorMessage.classList.remove('show');
+                }, 2000);
+            }
+
+            function checkPassword() {
+                if (isLockedOut) {
+                    lockoutPoem.classList.add('show');
+                    updateLockoutTimer();
+                    return;
+                }
+                
+                const enteredPassword = passwordInput.value;
+                
+                if (enteredPassword === correctPassword) {
+                    isPasswordCorrect = true;
+                    failedAttempts = 0; // Reset failed attempts on success
+                    hidePasswordModal();
+                    setTimeout(() => {
+                        openEnvelope();
+                    }, 300);
+                } else {
+                    showError();
+                }
+            }
+            function openEnvelope() {
+                if (isAnimating) return;
+                
+                if (isLockedOut) {
+                    lockoutPoem.classList.add('show');
+                    updateLockoutTimer();
+                    return;
+                }
+                
+                if (!isPasswordCorrect) {
+                    showPasswordModal();
+                    return;
+                }
+                
+                isAnimating = true;
+                envelopeContainer.classList.add('opened');
+                envelopeContainer.setAttribute('aria-expanded', 'true');
+                envelopeContainer.setAttribute('aria-label', 'Zarf açıldı');
+                
+                setTimeout(() => {
+                    isAnimating = false;
+                }, 1400);
+            }
+
+            // Event listeners for envelope
+            envelopeContainer.addEventListener('click', openEnvelope);
+            envelopeContainer.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    if (!envelopeContainer.classList.contains('opened')) {
+                        openEnvelope();
+                    }
+                }
+            });
+
+            // Password modal event listeners
+            submitButton.addEventListener('click', checkPassword);
+            cancelButton.addEventListener('click', hidePasswordModal);
+            
+            passwordInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    checkPassword();
+                } else if (e.key === 'Escape') {
+                    hidePasswordModal();
+                }
+            });
+
+            // Only allow numbers in password input
+            passwordInput.addEventListener('input', (e) => {
+                e.target.value = e.target.value.replace(/[^0-9]/g, '');
+            });
+
+            // Close modal when clicking outside
+            passwordOverlay.addEventListener('click', (e) => {
+                if (e.target === passwordOverlay) {
+                    hidePasswordModal();
+                }
+            });
+
+            // Close lockout poem when clicking outside
+            lockoutPoem.addEventListener('click', (e) => {
+                if (e.target === lockoutPoem && !isLockedOut) {
+                    lockoutPoem.classList.remove('show');
+                }
+            });
+
+            // Prevent multiple rapid clicks
+            document.addEventListener('click', (e) => {
+                if (isAnimating) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            }, true);
+
+            // Initial accessibility attributes
+            envelopeContainer.setAttribute('aria-expanded', 'false');
+            
+            // Preload optimization
+            const style = document.createElement('style');
+            style.textContent = `
+                .envelope-container, .envelope-lid, .note-paper {
+                    transform: translateZ(0);
+                }
+            `;
+            document.head.appendChild(style);
+        })();
+    </script>
+</body>
+</html>
